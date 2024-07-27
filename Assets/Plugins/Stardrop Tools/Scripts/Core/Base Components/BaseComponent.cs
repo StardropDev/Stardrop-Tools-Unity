@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace StardropTools
 {
+    /// <summary>
+    /// BaseComponent is a base class for all components with custom initialization and update logic.
+    /// </summary>
     public class BaseComponent : MonoBehaviour, IInitializable, ILateInitializable, IUpdateable, ILateUpdateable, IFixedUpdateable
     {
         protected GameObject cachedGameObject;

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace StardropTools
+namespace StardropTools.Tween
 {
     public class TweenLocalPosition : TweenComponentValues<Transform, Vector3>
     {

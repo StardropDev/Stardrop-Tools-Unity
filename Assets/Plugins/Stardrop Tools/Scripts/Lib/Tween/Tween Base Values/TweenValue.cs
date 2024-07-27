@@ -2,7 +2,7 @@
 using System;
 using UnityEngine;
 
-namespace StardropTools
+namespace StardropTools.Tween
 {
     public abstract class TweenValue<T> : Tween
     {

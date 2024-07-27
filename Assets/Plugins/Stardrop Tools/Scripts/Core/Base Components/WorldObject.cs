@@ -1,8 +1,10 @@
-﻿
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace StardropTools
 {
+    /// <summary>
+    /// Base class for all Transform intensive objects that exist in the world.
+    /// </summary>
     public class WorldObject : BaseComponent
     {
         public Transform Parent
@@ -62,8 +64,6 @@ namespace StardropTools
         public Vector3 Up => Transform.up;
         public Vector3 Down => -Transform.up;
 
-
-
         public void SetPositionAndRotation(Vector3 position, Quaternion rotation)
         {
             Transform.SetPositionAndRotation(position, rotation);
@@ -74,8 +74,6 @@ namespace StardropTools
             Transform.SetLocalPositionAndRotation(localPosition, localRotation);
         }
 
-
-
         public void LookAt(Vector3 target)
         {
             Transform.LookAt(target);
@@ -84,6 +82,62 @@ namespace StardropTools
         public void LookAt(Transform target)
         {
             Transform.LookAt(target);
+        }
+
+        public void LookAt(Vector3 target, Vector3 worldUp)
+        {
+            Transform.LookAt(target, worldUp);
+        }
+
+        public void LookAt(Transform target, Vector3 worldUp)
+        {
+            Transform.LookAt(target, worldUp);
+        }
+
+        public void SetParent(Transform parent, bool worldPositionStays)
+        {
+            Transform.SetParent(parent, worldPositionStays);
+        }
+
+        public void Translate(Vector3 translation, Space space = Space.Self)
+        {
+            Transform.Translate(translation, space);
+        }
+
+        public void Rotate(Vector3 eulerAngles, Space space = Space.Self)
+        {
+            Transform.Rotate(eulerAngles, space);
+        }
+
+        public void ResetTransform()
+        {
+            Transform.position = Vector3.zero;
+            Transform.rotation = Quaternion.identity;
+            Transform.localScale = Vector3.one;
+        }
+
+        public void CopyTransform(Transform source)
+        {
+            Transform.position = source.position;
+            Transform.rotation = source.rotation;
+            Transform.localScale = source.localScale;
+        }
+
+        public Transform GetChild(int index)
+        {
+            return Transform.GetChild(index);
+        }
+
+        public Transform GetChildByName(string name)
+        {
+            foreach (Transform child in Transform)
+            {
+                if (child.name == name)
+                {
+                    return child;
+                }
+            }
+            return null;
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿
-namespace StardropTools
+namespace StardropTools.Tween
 {
     public class TweenFloat : TweenValue<float>
     {

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace StardropTools
+namespace StardropTools.Tween
 {
     public class TweenManager : Singleton<TweenManager>
     {

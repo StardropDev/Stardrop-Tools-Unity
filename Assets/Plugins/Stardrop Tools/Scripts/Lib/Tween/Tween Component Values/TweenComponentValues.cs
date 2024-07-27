@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace StardropTools
+namespace StardropTools.Tween
 {
     public abstract class TweenComponentValues<TComponent, TValue> : Tween where TComponent : Component
     {

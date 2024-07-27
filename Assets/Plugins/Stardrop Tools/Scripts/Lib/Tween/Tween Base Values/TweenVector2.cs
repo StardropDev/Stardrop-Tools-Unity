@@ -1,7 +1,7 @@
 ﻿
 using UnityEngine;
 
-namespace StardropTools
+namespace StardropTools.Tween
 {
     public class TweenVector2 : TweenValue<Vector2>
     {

@@ -1,5 +1,5 @@
 ﻿
-namespace StardropTools
+namespace StardropTools.Tween
 {
     public interface ITween : IPlayableState, IPlayable<Tween>, IPlayableCallback<Tween>, IPausable<Tween>, IResumable<Tween>, IStoppable<Tween>, IExecutable
     {

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace StardropTools
+namespace StardropTools.Tween
 {
     public class TweenSizeDelta : TweenComponentValues<RectTransform, Vector2>
     {

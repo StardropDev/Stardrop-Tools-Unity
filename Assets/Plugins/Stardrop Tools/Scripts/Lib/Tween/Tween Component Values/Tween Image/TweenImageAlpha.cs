@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-namespace StardropTools
+namespace StardropTools.Tween
 {
     public class TweenImageAlpha : TweenComponentValues<Image, float>
     {

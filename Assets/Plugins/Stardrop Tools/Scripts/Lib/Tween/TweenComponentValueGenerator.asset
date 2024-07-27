@@ -17,3 +17,23 @@ MonoBehaviour:
   component: Transform
   valueType: Vector3
   property: position
+  scriptPreview: "\r\nusing UnityEngine;\r\n\r\nnamespace StardropTools\r\n{\r\n   
+    public class TweenTransformPosition : TweenComponentValues<Transform, Vector3>\r\n   
+    {\r\n        public TweenTransformPosition(Transform targetComponent, Vector3
+    endValue) : base(targetComponent, endValue)\r\n        {\r\n            startValue
+    = targetComponent.position;\r\n        }\r\n\r\n        public TweenTransformPosition(Transform
+    targetComponent, Vector3 startValue, Vector3 endValue)\r\n            : base(targetComponent,
+    startValue, endValue)\r\n        {\r\n        }\r\n\r\n        public TweenTransformPosition(int
+    id, Transform targetComponent, Vector3 startValue, Vector3 endValue)\r\n           
+    : base(id, targetComponent, startValue, endValue)\r\n        {\r\n        }\r\n\r\n       
+    public TweenTransformPosition(int id, Transform targetComponent, Vector3 startValue,
+    Vector3 endValue, float duration, float delay = 0, EaseType easeType = EaseType.EaseInOutSine,
+    LoopType loopType = LoopType.None, int loopCount = 0, AnimationCurve animationCurve
+    = null, System.Action onCompleteCallback = null, System.Action<Vector3> onValueChangedCallback
+    = null)\r\n            : base(id, targetComponent, startValue, endValue, duration,
+    delay, easeType, loopType, loopCount, animationCurve, onCompleteCallback, onValueChangedCallback)\r\n       
+    {\r\n        }\r\n\r\n        protected override Vector3 Interpolate(Vector3
+    startValue, Vector3 endValue, float percent)\r\n        {\r\n            return
+    Vector3.LerpUnclamped(startValue, endValue, percent);\r\n        }\r\n\r\n       
+    protected override void ApplyValue(Transform component, Vector3 value)\r\n       
+    {\r\n            component.position = value;\r\n        }\r\n    }\r\n}\r\n"

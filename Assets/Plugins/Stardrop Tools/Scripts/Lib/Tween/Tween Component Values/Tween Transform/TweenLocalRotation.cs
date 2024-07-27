@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace StardropTools
+namespace StardropTools.Tween
 {
     public class TweenLocalRotation : TweenComponentValues<Transform, Quaternion>
     {

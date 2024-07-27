@@ -1,9 +1,8 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace StardropTools
 {
-    [CreateAssetMenu(menuName = "Stardrop / Weighted Int List")]
+    [CreateAssetMenu(menuName = "Stardrop Tools / Weighted Int List")]
     public class WeightedListSO : ScriptableObject
     {
         [SerializeField] WeightedList<int> list;

@@ -3,7 +3,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace StardropTools
+namespace StardropTools.Tween
 {
     [CreateAssetMenu(fileName = "TweenComponentValueGenerator", menuName = "Stardrop Tools/Tween/Tween Component Value Generator")]
     public class TweenComponentValueGenerator : ScriptableObject
@@ -14,6 +14,9 @@ namespace StardropTools
         [SerializeField] private string component = "Transform";
         [SerializeField] private string valueType = "Vector3";
         [SerializeField] private string property = "position";
+
+        [TextArea(10, 50)]
+        [SerializeField] private string scriptPreview;
 
         [ContextMenu("Generate Tween Script")]
         [NaughtyAttributes.Button("Generate Tween Script")]
@@ -88,6 +91,52 @@ namespace StardropTools
                 default:
                     throw new System.ArgumentException($"Unsupported value type: {valueType}");
             }
+        }
+
+        [NaughtyAttributes.Button("Preview Script")]
+        private void PreviewScript()
+        {
+            string className = $"Tween{classTitle}";
+
+            scriptPreview = $@"
+using UnityEngine;
+
+namespace StardropTools
+{{
+    public class {className} : TweenComponentValues<{component}, {valueType}>
+    {{
+        public {className}({component} targetComponent, {valueType} endValue) : base(targetComponent, endValue)
+        {{
+            startValue = targetComponent.{property};
+        }}
+
+        public {className}({component} targetComponent, {valueType} startValue, {valueType} endValue)
+            : base(targetComponent, startValue, endValue)
+        {{
+        }}
+
+        public {className}(int id, {component} targetComponent, {valueType} startValue, {valueType} endValue)
+            : base(id, targetComponent, startValue, endValue)
+        {{
+        }}
+
+        public {className}(int id, {component} targetComponent, {valueType} startValue, {valueType} endValue, float duration, float delay = 0, EaseType easeType = EaseType.EaseInOutSine, LoopType loopType = LoopType.None, int loopCount = 0, AnimationCurve animationCurve = null, System.Action onCompleteCallback = null, System.Action<{valueType}> onValueChangedCallback = null)
+            : base(id, targetComponent, startValue, endValue, duration, delay, easeType, loopType, loopCount, animationCurve, onCompleteCallback, onValueChangedCallback)
+        {{
+        }}
+
+        protected override {valueType} Interpolate({valueType} startValue, {valueType} endValue, float percent)
+        {{
+            return {GetLerpMethod(valueType)}(startValue, endValue, percent);
+        }}
+
+        protected override void ApplyValue({component} component, {valueType} value)
+        {{
+            component.{property} = value;
+        }}
+    }}
+}}
+";
         }
     }
 }
