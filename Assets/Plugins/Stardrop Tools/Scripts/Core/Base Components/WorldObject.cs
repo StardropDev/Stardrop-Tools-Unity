@@ -94,6 +94,15 @@ namespace StardropTools
             Transform.LookAt(target, worldUp);
         }
 
+        private void SmoothLookAt(Transform observer, Vector3 direction, float speed)
+        {
+            if (direction != Vector3.zero)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                observer.rotation = Quaternion.Slerp(observer.rotation, targetRotation, speed * Time.deltaTime);
+            }
+        }
+
         public void SetParent(Transform parent, bool worldPositionStays)
         {
             Transform.SetParent(parent, worldPositionStays);

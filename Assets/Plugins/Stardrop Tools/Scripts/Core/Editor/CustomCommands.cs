@@ -8,7 +8,6 @@ namespace StardropTools.CustomCommands
     using System.Reflection;
     using UnityEngine;
     using UnityEditor;
-    using StardropTools;
 
     // % = control
     // # = shift
@@ -19,7 +18,7 @@ namespace StardropTools.CustomCommands
     public static class CustomCommands
     {
         public static bool _cmdsActive = true;
-        const string customCommands = "Custom Commands/";
+        const string customCommands = "Stardrop Tools/Commands/";
 
         static CustomCommands()
         {
@@ -36,7 +35,7 @@ namespace StardropTools.CustomCommands
 
         // Enable
         // =============================================== Enable 
-        [MenuItem("Custom Commands/Activate Commands #a")]
+        [MenuItem(customCommands + "/Activate Commands %#a")]
         static void EnableCommands()
         {
             if (_cmdsActive == false)
@@ -72,7 +71,7 @@ namespace StardropTools.CustomCommands
 
         // Activate or Deactivate Objects
         // =============================================== Activate or Deactivate Objects
-        [MenuItem("Custom Commands/Activate or Deactivate _a")]
+        [MenuItem(customCommands + "/Activate or Deactivate _a")]
         static void ActivateSelection()
         {
             if (Selection.activeTransform != null && _cmdsActive)
@@ -127,7 +126,7 @@ namespace StardropTools.CustomCommands
         // & = alt
         // Reset Position
         // =============================================== Reset Position
-        [MenuItem("Custom Commands/Reset World Position &s")]
+        [MenuItem(customCommands + "/Reset World Position &s")]
         static void ResetPos()
         {
             if (Selection.activeTransform != null && _cmdsActive)
@@ -160,7 +159,7 @@ namespace StardropTools.CustomCommands
         // & = alt
         // Reset Position
         // =============================================== Reset Position
-        [MenuItem("Custom Commands/Reset Local Position #s")]
+        [MenuItem(customCommands + "/Reset Local Position #s")]
         static void ResetLocalPosi()
         {
             if (Selection.activeTransform != null && _cmdsActive)
@@ -193,7 +192,7 @@ namespace StardropTools.CustomCommands
         // & = alt
         // Reset Rotation
         // =============================================== Reset Rotation
-        [MenuItem("Custom Commands/Reset World Rotation #r")]
+        [MenuItem(customCommands + "/Reset World Rotation #r")]
         static void ResetRotation()
         {
             if (Selection.activeTransform != null && _cmdsActive)
@@ -226,7 +225,7 @@ namespace StardropTools.CustomCommands
         // & = alt
         // Reset Scale
         // =============================================== Reset Scale
-        [MenuItem("Custom Commands/Reset Scale &r")]
+        [MenuItem(customCommands + "/Reset Scale &r")]
         static void ResetScale()
         {
             if (Selection.activeTransform != null && _cmdsActive)
@@ -254,7 +253,7 @@ namespace StardropTools.CustomCommands
 
         // Enable & Disable MeshRenderer
         // =============================================== Enable & Disable MeshRenderer
-        [MenuItem("Custom Commands/Enable or Disable MeshRenderer _d")]
+        [MenuItem(customCommands + "/Enable or Disable MeshRenderer _d")]
         static void EnableMeshRenderer()
         {
             if (Selection.activeTransform != null && _cmdsActive)
@@ -327,7 +326,7 @@ namespace StardropTools.CustomCommands
 
         // Enable & Disable Colliders
         // =============================================== Enable & Disable Colliders
-        [MenuItem("Custom Commands/Enable or Disable Colliders #c")] // c
+        [MenuItem(customCommands + "/Enable or Disable Colliders #c")] // c
         static void EnableColliders()
         {
             if (Selection.activeTransform != null && _cmdsActive)
@@ -399,7 +398,7 @@ namespace StardropTools.CustomCommands
 
         // Set Selected Image Opacity all different
         // =============================================== Image Opacity Chain
-        [MenuItem("Custom Commands/Image Opacity Chain #i")] // shift + i
+        [MenuItem(customCommands + "/Image Opacity Chain #i")] // shift + i
         static void ImageOpacityChain()
         {
             if (Selection.activeTransform != null && _cmdsActive)
@@ -450,7 +449,7 @@ namespace StardropTools.CustomCommands
 
         // Inverse XYZ Positions of selected objects
         // =============================================== Inverse Axis
-        [MenuItem("Custom Commands/Inverse X Axis #x")] // shift + x
+        [MenuItem(customCommands + "/Inverse X Axis #x")] // shift + x
         static void InverseX()
         {
             if (Selection.activeTransform != null && _cmdsActive)
@@ -470,7 +469,7 @@ namespace StardropTools.CustomCommands
         }
 
 
-        [MenuItem("Custom Commands/Inverse Y Axis #y")] // shift + y
+        [MenuItem(customCommands + "/Inverse Y Axis #y")] // shift + y
         static void InverseY()
         {
             if (Selection.activeTransform != null && _cmdsActive)
@@ -490,7 +489,7 @@ namespace StardropTools.CustomCommands
         }
 
 
-        [MenuItem("Custom Commands/Inverse Z Axis #z")] // shift + z
+        [MenuItem(customCommands + "/Inverse Z Axis #z")] // shift + z
         static void InverseZ()
         {
             if (Selection.activeTransform != null && _cmdsActive)
@@ -510,7 +509,7 @@ namespace StardropTools.CustomCommands
         }
 
 
-        [MenuItem("Custom Commands/Delete Object Children %#d")] // Ctrl + Shift + Del
+        [MenuItem(customCommands + "/Delete Object Children %#d")] // Ctrl + Shift + Del
         static void DeleteChildrenOfSelecteddObject()
         {
             if (Selection.activeTransform != null && _cmdsActive)
@@ -527,12 +526,63 @@ namespace StardropTools.CustomCommands
                 }
             }
         }
-    }
 
-    // taken from https://forum.unity.com/threads/shortcut-key-for-lock-inspector.95815/
-    public class InspectorLockToggle
-    {
-        [MenuItem("Custom Commands/Toggle Inspector Lock #w")] // shift + w
+        // Method to rename animations to the name of the FBX file
+        [MenuItem(customCommands + "/Rename Animations to FBX Name %&r", validate = false)] // ctrl + alt + r
+        static void RenameAnimationsToFBXName()
+        {
+            if (Application.isPlaying)
+            {
+                Debug.LogWarning("This command cannot be executed in play mode.");
+                return;
+            }
+
+            UnityEngine.Object[] selectedObjects = Selection.objects;
+            foreach (var obj in selectedObjects)
+            {
+                if (obj is GameObject)
+                {
+                    string assetPath = AssetDatabase.GetAssetPath(obj);
+                    if (assetPath.EndsWith(".fbx", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string fbxName = System.IO.Path.GetFileNameWithoutExtension(assetPath);
+                        ModelImporter modelImporter = AssetImporter.GetAtPath(assetPath) as ModelImporter;
+                        if (modelImporter != null)
+                        {
+                            ModelImporterClipAnimation[] clipAnimations = modelImporter.clipAnimations;
+
+                            if (clipAnimations.Length == 0)
+                            {
+                                clipAnimations = modelImporter.defaultClipAnimations;
+                            }
+
+                            bool updated = false;
+                            foreach (var clip in clipAnimations)
+                            {
+                                if (clip.name != fbxName)
+                                {
+                                    clip.name = fbxName;
+                                    updated = true;
+                                }
+                            }
+
+                            if (updated)
+                            {
+                                modelImporter.clipAnimations = clipAnimations;
+                                AssetDatabase.WriteImportSettingsIfDirty(assetPath);
+                                AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
+                                Debug.Log($"Renamed animation to {fbxName} for {assetPath}");
+                            }
+                        }
+                    }
+                }
+            }
+
+            AssetDatabase.Refresh();
+        }
+
+        // taken from https://forum.unity.com/threads/shortcut-key-for-lock-inspector.95815/
+        [MenuItem(customCommands + "/Toggle Inspector Lock #w")] // shift + w
         static void ToggleInspectorLock() // Inspector must be inspecting something to be locked
         {
             EditorWindow inspectorToBeLocked = EditorWindow.mouseOverWindow; // "EditorWindow.focusedWindow" can be used instead
@@ -549,20 +599,31 @@ namespace StardropTools.CustomCommands
             }
         }
 
-        [MenuItem("Custom Commands/Toggle Inspector Debug #%e")] // shift + ctlr + e
+        [MenuItem(customCommands + "/Toggle Inspector Debug #%w")] // shift + ctrl + W
         static void ToggleDebugMode()
         {
-            EditorWindow inspectorToBeDebugged = EditorWindow.mouseOverWindow; // "EditorWindow.focusedWindow" can be used instead
+            EditorWindow inspectorWindow = EditorWindow.mouseOverWindow; // "EditorWindow.focusedWindow" can be used instead
 
-            if (inspectorToBeDebugged != null && inspectorToBeDebugged.GetType().Name == "InspectorWindow")
+            if (inspectorWindow != null && inspectorWindow.GetType().Name == "InspectorWindow")
             {
-                Type type = Assembly.GetAssembly(typeof(Editor)).GetType("UnityEditor.InspectorWindow");
-                PropertyInfo propertyInfo = type.GetProperty("isLocked");
-                bool value = (bool)propertyInfo.GetValue(inspectorToBeDebugged, null);
-                propertyInfo.SetValue(inspectorToBeDebugged, !value, null);
-                inspectorToBeDebugged.Repaint();
+                // Access the InspectorWindow type
+                Type inspectorType = Assembly.GetAssembly(typeof(Editor)).GetType("UnityEditor.InspectorWindow");
 
-                Debug.LogFormat("<Color=white>Inspector Debug Mode:</color> <color=magenta>{0}</color>", !value);
+                // Get the "mode" field, which determines the current mode (Normal or Debug)
+                FieldInfo modeField = inspectorType.GetField("m_InspectorMode", BindingFlags.NonPublic | BindingFlags.Instance);
+                int mode = (int)modeField.GetValue(inspectorWindow);
+
+                // Toggle the mode between 0 (Normal) and 1 (Debug)
+                int newMode = mode == 0 ? 1 : 0;
+                modeField.SetValue(inspectorWindow, newMode);
+
+                // Call the SetMode method to apply the change
+                MethodInfo setModeMethod = inspectorType.GetMethod("SetMode", BindingFlags.NonPublic | BindingFlags.Instance);
+                setModeMethod.Invoke(inspectorWindow, new object[] { newMode });
+
+                inspectorWindow.Repaint();
+
+                Debug.LogFormat($"<Color=white>Inspector Debug Mode:</Color> <Color=magenta>{newMode == 1}</Color>");
             }
         }
     }

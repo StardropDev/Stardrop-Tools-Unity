@@ -12,6 +12,9 @@ namespace StardropTools
 
         public bool IsCollidable => collider != null ? collider.enabled : false;
         public bool IsKinematic => rigidbody != null ? rigidbody.isKinematic : false;
+        public bool IsUsingGravity => rigidbody != null ? rigidbody.useGravity : false;
+        public bool IsSleeping => rigidbody != null ? rigidbody.IsSleeping() : false;
+        public bool IsAwake => rigidbody != null ? !rigidbody.IsSleeping() : false;
 
         public void AddForce(Vector3 force, ForceMode forceMode = ForceMode.Impulse)
         {
@@ -100,6 +103,12 @@ namespace StardropTools
             rigidbody.isKinematic = value;
         }
 
+        public void SetEnabledGravity(bool value)
+        {
+            if (rigidbody == null) return;
+            rigidbody.useGravity = value;
+        }
+
         public void EnableCollision()
         {
             SetEnabledCollisions(true);
@@ -118,6 +127,16 @@ namespace StardropTools
         public void DisableKinematic()
         {
             SetIsKinematic(false);
+        }
+
+        public void EnableGravity()
+        {
+            SetEnabledGravity(true);
+        }
+
+        public void DisableGravity()
+        {
+            SetEnabledGravity(false);
         }
     }
 }
