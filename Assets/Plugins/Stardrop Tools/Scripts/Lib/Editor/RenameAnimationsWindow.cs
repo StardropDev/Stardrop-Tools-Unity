@@ -12,6 +12,10 @@ namespace StardropTools.CustomEditorWindows
         private Vector2 scrollPosition;
         private bool isGridView = true;
 
+        private UnityEngine.Object lastClickedObject;
+        private string fbxName;
+        private List<string> clipNames = new List<string>();
+
         [MenuItem("Stardrop Tools/Open Rename Animations Window %#&a")] // ctrl + shift + alt + a
         public static void OpenWindow()
         {
@@ -38,14 +42,16 @@ namespace StardropTools.CustomEditorWindows
                 isGridView = !isGridView;
             }
 
-            HandleDragAndDrop();
-
-            DrawSelectedFbxFiles();
-
             if (GUILayout.Button("Rename Animation Clips to FBX name"))
             {
                 RenameAnimations();
             }
+
+            HandleDragAndDrop();
+
+            DrawSelectedFbxFiles();
+
+            DrawSelectedAnimationInfo();
         }
 
         private void DrawSelectedFbxFiles()
@@ -73,6 +79,9 @@ namespace StardropTools.CustomEditorWindows
                     {
                         EditorGUIUtility.PingObject(obj);
                         Selection.activeObject = obj;
+                        lastClickedObject = obj;
+                        fbxName = obj.name;
+                        UpdateClipNames(obj, false); // Set clipNames without updating them
                     }
                     GUIStyle labelStyle = new GUIStyle(EditorStyles.centeredGreyMiniLabel)
                     {
@@ -95,6 +104,9 @@ namespace StardropTools.CustomEditorWindows
                     {
                         EditorGUIUtility.PingObject(obj);
                         Selection.activeObject = obj;
+                        lastClickedObject = obj;
+                        fbxName = obj.name;
+                        UpdateClipNames(obj, false); // Set clipNames without updating them
                     }
                     GUILayout.Label(obj.name, GUILayout.Width(200));
                     GUILayout.EndHorizontal();
@@ -192,6 +204,69 @@ namespace StardropTools.CustomEditorWindows
                     }
                     Event.current.Use();
                     break;
+            }
+        }
+
+        private void DrawSelectedAnimationInfo()
+        {
+            if (lastClickedObject != null)
+            {
+                GUILayout.Space(10);
+                GUILayout.Label("Selected Animation Info", EditorStyles.boldLabel);
+                GUILayout.Label($"FBX Name: {fbxName}");
+
+                for (int i = 0; i < clipNames.Count; i++)
+                {
+                    clipNames[i] = EditorGUILayout.TextField($"Clip Name {i + 1}: ", clipNames[i]);
+                }
+
+                if (GUILayout.Button("Update Clip Names"))
+                {
+                    UpdateClipNames(lastClickedObject, true); // Update clip names when button is clicked
+                    GUI.FocusControl(null); // Lose focus from all controls
+                }
+            }
+        }
+
+        private void UpdateClipNames(UnityEngine.Object obj, bool updateNames)
+        {
+            string assetPath = AssetDatabase.GetAssetPath(obj);
+            ModelImporter modelImporter = AssetImporter.GetAtPath(assetPath) as ModelImporter;
+            if (modelImporter != null)
+            {
+                ModelImporterClipAnimation[] clipAnimations = modelImporter.clipAnimations;
+
+                if (clipAnimations.Length == 0)
+                {
+                    clipAnimations = modelImporter.defaultClipAnimations;
+                }
+
+                if (updateNames)
+                {
+                    if (clipAnimations.Length == clipNames.Count)
+                    {
+                        for (int i = 0; i < clipAnimations.Length; i++)
+                        {
+                            clipAnimations[i].name = clipNames[i];
+                        }
+                        modelImporter.clipAnimations = clipAnimations;
+                        AssetDatabase.WriteImportSettingsIfDirty(assetPath);
+                        AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
+                        Debug.Log($"Updated animation clip names for {assetPath}");
+                    }
+                    else
+                    {
+                        Debug.LogError("The number of clip names does not match the number of animation clips.");
+                    }
+                }
+                else
+                {
+                    clipNames.Clear();
+                    foreach (var clip in clipAnimations)
+                    {
+                        clipNames.Add(clip.name);
+                    }
+                }
             }
         }
     }
