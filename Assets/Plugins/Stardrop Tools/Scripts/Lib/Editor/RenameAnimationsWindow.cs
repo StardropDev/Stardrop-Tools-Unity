@@ -11,8 +11,6 @@ namespace StardropTools.CustomEditorWindows
         private List<UnityEngine.Object> selectedFbxObjects = new List<UnityEngine.Object>();
         private Vector2 scrollPosition;
         private bool isGridView = true;
-        private UnityEngine.Object lastClickedObject;
-        private string newName;
 
         [MenuItem("Stardrop Tools/Open Rename Animations Window %#&a")] // ctrl + shift + alt + a
         public static void OpenWindow()
@@ -44,12 +42,10 @@ namespace StardropTools.CustomEditorWindows
 
             DrawSelectedFbxFiles();
 
-            if (GUILayout.Button("Rename Animations to FBX name"))
+            if (GUILayout.Button("Rename Animation Clips to FBX name"))
             {
                 RenameAnimations();
             }
-
-            DrawRenameSection();
         }
 
         private void DrawSelectedFbxFiles()
@@ -77,8 +73,6 @@ namespace StardropTools.CustomEditorWindows
                     {
                         EditorGUIUtility.PingObject(obj);
                         Selection.activeObject = obj;
-                        lastClickedObject = obj;
-                        newName = obj.name;
                     }
                     GUIStyle labelStyle = new GUIStyle(EditorStyles.centeredGreyMiniLabel)
                     {
@@ -101,8 +95,6 @@ namespace StardropTools.CustomEditorWindows
                     {
                         EditorGUIUtility.PingObject(obj);
                         Selection.activeObject = obj;
-                        lastClickedObject = obj;
-                        newName = obj.name;
                     }
                     GUILayout.Label(obj.name, GUILayout.Width(200));
                     GUILayout.EndHorizontal();
@@ -202,23 +194,5 @@ namespace StardropTools.CustomEditorWindows
                     break;
             }
         }
-
-        private void DrawRenameSection()
-        {
-            if (lastClickedObject != null)
-            {
-                GUILayout.Space(10);
-                GUILayout.Label("Rename Selected Object", EditorStyles.boldLabel);
-                newName = EditorGUILayout.TextField("New Name", newName);
-
-                if (GUILayout.Button("Apply Rename"))
-                {
-                    string assetPath = AssetDatabase.GetAssetPath(lastClickedObject);
-                    AssetDatabase.RenameAsset(assetPath, newName);
-                    AssetDatabase.SaveAssets();
-                    AssetDatabase.Refresh();
-
-                    int index = selectedFbxObjects.IndexOf(lastClickedObject);
-                    if (index != -1)
-                    {
-                        selectedFbxObjects[index] = AssetDatabase.LoadAssetAtPath < Unity
+    }
+}
