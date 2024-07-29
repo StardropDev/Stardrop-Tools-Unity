@@ -4,12 +4,12 @@ namespace StardropTools.GameKit
 {
     public class BaseEntity : WorldObject
     {
-        [SerializeField] protected EntityModulePhysics physics;
+        [SerializeField] protected EntityPhysicsComponent physics;
 
         public int ID { get; set; }
         public string Name { get; set; }
 
-        public void SetPhysicsModule<T>() where T : EntityModulePhysics
+        public void SetPhysicsModule<T>() where T : EntityPhysicsComponent
         {
             if (physics != null)
             {

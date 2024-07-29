@@ -1,216 +1,217 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace StardropTools
 {
-    /// <summary>
-    /// Class responsible for the majority of the game loop (Normal, Fixed and Late Update functions), invoking the IUpdateable, IFixedUpdateable and ILateUpdateable
-    /// <para> Update()         as HandleUpdate() </para>
-    /// <para> FixedUpdate()    as HandleFixedUpdate() </para>
-    /// <para> LateUpdate()     as HandleLateUpdate() </para>
-    /// <para> Useful for calling update function, only when we need to update </para>
-    /// </summary>
     public class LoopManager : Singleton<LoopManager>
     {
-        [NaughtyAttributes.ShowNonSerializedField] private int updateCount;
-        [NaughtyAttributes.ShowNonSerializedField] private int fixedUpdateCount;
-        [NaughtyAttributes.ShowNonSerializedField] private int lateUpdateCount;
+        [NaughtyAttributes.ShowNonSerializedField] private static int updateCount;
+        [NaughtyAttributes.ShowNonSerializedField] private static int fixedUpdateCount;
+        [NaughtyAttributes.ShowNonSerializedField] private static int lateUpdateCount;
 
-        #region Events
+        static List<IUpdateable> updateList;
+        static List<IUpdateable> fixedUpdateList;
+        static List<IUpdateable> lateUpdateList;
 
-        public static readonly EventDelegate OnFrameworkInitialized = new EventDelegate();
-
-        #endregion
-
-        static List<IUpdateable>        updateList;
-        static List<IFixedUpdateable>   fixedUpdateList;
-        static List<ILateUpdateable>    lateUpdateList;
-
+        static Dictionary<IUpdateable, UpdateData> updateData;
+        static Dictionary<IUpdateable, float> updateDurations;
+        static List<UpdateData> dataToRemove;
 
         public override void Initialize()
         {
             base.Initialize();
 
             updateList = new List<IUpdateable>();
-            fixedUpdateList = new List<IFixedUpdateable>();
-            lateUpdateList = new List<ILateUpdateable>();
-
-            OnFrameworkInitialized?.Invoke();
+            fixedUpdateList = new List<IUpdateable>();
+            lateUpdateList = new List<IUpdateable>();
+            updateData = new Dictionary<IUpdateable, UpdateData>();
+            updateDurations = new Dictionary<IUpdateable, float>();
+            dataToRemove = new List<UpdateData>();
         }
-
 
         private void Update()
         {
-            if (IsInitialized == false)
+            if (!IsInitialized || updateList.Count == 0)
                 return;
 
-            if (updateList.Count > 0)
+            float currentTime = Time.time;
+            for (int i = 0; i < updateList.Count; i++)
             {
-                if (updateCount != updateList.Count)
-                    updateCount = updateList.Count;
+                var updateable = updateList[i];
 
-                for (int i = 0; i < updateList.Count; i++)
-                    updateList[i].HandleUpdate();
+                try
+                {
+                    var data = updateData[updateable];
+
+                    if (data.IsScheduledForRemoval)
+                        continue;
+
+                    if (data.nextUpdateTime <= currentTime)
+                    {
+                        updateable.HandleUpdate();
+                        if (data.updateFrequency > 0)
+                            data.CalculateNextUpdateTime();
+
+                        if (updateDurations.TryGetValue(updateable, out float duration) && duration > 0)
+                        {
+                            data.nextUpdateTime = currentTime + duration;
+                            updateData[updateable] = data; // Ensure the updated data is stored back
+                        }
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError("Error in Updateable: " + e.Message);
+                }
             }
-        }
 
+            RemoveScheduledData();
+        }
 
         private void FixedUpdate()
         {
-            if (IsInitialized == false)
+            if (!IsInitialized || fixedUpdateList.Count == 0)
                 return;
 
-            if (fixedUpdateList.Count > 0)
+            float currentTime = Time.fixedTime;
+            for (int i = 0; i < fixedUpdateList.Count; i++)
             {
-                if (fixedUpdateCount != fixedUpdateList.Count)
-                    fixedUpdateCount = fixedUpdateList.Count;
+                var updateable = fixedUpdateList[i];
 
-                for (int i = 0; i < fixedUpdateList.Count; i++)
-                    fixedUpdateList[i].HandleFixedUpdate();
+                try
+                {
+                    var data = updateData[updateable];
+
+                    if (data.IsScheduledForRemoval)
+                        continue;
+
+                    if (data.nextUpdateTime <= currentTime)
+                    {
+                        updateable.HandleUpdate();
+                        if (data.updateFrequency > 0)
+                            data.CalculateNextUpdateTime();
+
+                        if (updateDurations.TryGetValue(updateable, out float duration) && duration > 0)
+                        {
+                            data.nextUpdateTime = currentTime + duration;
+                            updateData[updateable] = data; // Ensure the updated data is stored back
+                        }
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError("Error in FixedUpdateable: " + e.Message);
+                }
             }
-        }
 
+            RemoveScheduledData();
+        }
 
         private void LateUpdate()
         {
-            if (IsInitialized == false)
+            if (!IsInitialized || lateUpdateList.Count == 0)
                 return;
 
-            if (lateUpdateList.Count > 0)
+            float currentTime = Time.time;
+            for (int i = 0; i < lateUpdateList.Count; i++)
             {
-                if (lateUpdateCount != lateUpdateList.Count)
-                    lateUpdateCount = lateUpdateList.Count;
+                var updateable = lateUpdateList[i];
 
-                for (int i = 0; i < lateUpdateList.Count; i++)
-                    lateUpdateList[i].HandleLateUpdate();
+                try
+                {
+                    var data = updateData[updateable];
+
+                    if (data.IsScheduledForRemoval)
+                        continue;
+
+                    if (data.nextUpdateTime <= currentTime)
+                    {
+                        updateable.HandleUpdate();
+                        if (data.updateFrequency > 0)
+                            data.CalculateNextUpdateTime();
+
+                        if (updateDurations.TryGetValue(updateable, out float duration) && duration > 0)
+                        {
+                            data.nextUpdateTime = currentTime + duration;
+                            updateData[updateable] = data; // Ensure the updated data is stored back
+                        }
+                    }
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError("Error in LateUpdateable: " + e.Message);
+                }
             }
+
+            RemoveScheduledData();
         }
 
-
-        /// <summary>
-        /// Adds item to the Update List 
-        /// </summary>
-        public static void AddToUpdate(IUpdateable updateable) => updateList.Add(updateable);
-
-        /// <summary>
-        /// If list doesn't contain the item, we add it
-        /// </summary>
-        public static void AddToUpdateSafe(IUpdateable updateable)
+        public static void AddToUpdate(IUpdateable updateable, float updateFrequency = 0, float updateDuration = 0, UpdateType updateType = UpdateType.Update)
         {
-            if (updateList.Contains(updateable) == false)
+            if (updateData.ContainsKey(updateable))
+            {
+                Debug.LogWarning("Updateable already exists in the update list.");
+                return;
+            }
+
+            if (updateFrequency < 0)
+                updateFrequency = 0;
+
+            updateData[updateable] = new UpdateData(updateFrequency, updateable, updateType);
+
+            if (updateDuration > 0)
+                updateDurations[updateable] = updateDuration;
+
+            if (updateType == UpdateType.Update)
                 updateList.Add(updateable);
-        }
-
-
-        /// <summary>
-        /// Remove item from the Update list
-        /// </summary>
-        public static void RemoveFromUpdate(IUpdateable updateable) => updateList.Remove(updateable);
-
-        /// <summary>
-        /// If list contains the item, we REMOVE it
-        /// </summary>
-        public static void RemoveFromUpdateSafe(IUpdateable updateable)
-        {
-            if (updateList.Contains(updateable))
-                updateList.Remove(updateable);
-        }
-
-
-
-        /// <summary>
-        /// Adds item to the Update List 
-        /// </summary>
-        public static void AddToFixedUpdate(IFixedUpdateable updateable) => fixedUpdateList.Add(updateable);
-
-        /// <summary>
-        /// If list doesn't contain the item, we add it
-        /// </summary>
-        public static void AddToFixedUpdateSafe(IFixedUpdateable updateable)
-        {
-            if (fixedUpdateList.Contains(updateable) == false)
+            else if (updateType == UpdateType.FixedUpdate)
                 fixedUpdateList.Add(updateable);
-        }
-
-
-        /// <summary>
-        /// Remove item from the Update list
-        /// </summary>
-        public static void RemoveFromFixedUpdate(IFixedUpdateable updateable) => fixedUpdateList.Remove(updateable);
-
-        /// <summary>
-        /// If list contains the item, we REMOVE it
-        /// </summary>
-        public static void RemoveFromFixedUpdateSafe(IFixedUpdateable updateable)
-        {
-            if (fixedUpdateList.Contains(updateable))
-                fixedUpdateList.Remove(updateable);
-        }
-
-
-
-        /// <summary>
-        /// Adds item to the Update List 
-        /// </summary>
-        public static void AddToLateUpdate(ILateUpdateable updateable) => lateUpdateList.Add(updateable);
-
-        /// <summary>
-        /// If list doesn't contain the item, we add it
-        /// </summary>
-        public static void AddToLateUpdateSafe(ILateUpdateable updateable)
-        {
-            if (lateUpdateList.Contains(updateable) == false)
+            else if (updateType == UpdateType.LateUpdate)
                 lateUpdateList.Add(updateable);
+
+            RefreshListCount();
         }
 
-
-        /// <summary>
-        /// Remove item from the Update list
-        /// </summary>
-        public static void RemoveFromLateUpdate(ILateUpdateable updateable) => lateUpdateList.Remove(updateable);
-
-        /// <summary>
-        /// If list contains the item, we REMOVE it
-        /// </summary>
-        public static void RemoveFromLateUpdateSafe(ILateUpdateable updateable)
+        public static void RemoveFromUpdate(IUpdateable updateable)
         {
-            if (lateUpdateList.Contains(updateable))
+            if (!updateData.ContainsKey(updateable))
+            {
+                Debug.LogWarning("Updateable does not exist in the update list.");
+                return;
+            }
+
+            var data = updateData[updateable];
+            data.IsScheduledForRemoval = true;
+
+            if (data.updateType == UpdateType.Update)
+                updateList.Remove(updateable);
+            else if (data.updateType == UpdateType.FixedUpdate)
+                fixedUpdateList.Remove(updateable);
+            else if (data.updateType == UpdateType.LateUpdate)
                 lateUpdateList.Remove(updateable);
+
+            updateDurations.Remove(updateable);
+            dataToRemove.Add(data);
+            RefreshListCount();
         }
 
-
-
-        public void InitializeInstances(params IInitializable[] initializables)
+        static void RefreshListCount()
         {
-            foreach (var initializable in initializables)
-            {
-                initializable.Initialize();
-            }
+            updateCount = updateList.Count;
+            fixedUpdateCount = fixedUpdateList.Count;
+            lateUpdateCount = lateUpdateList.Count;
         }
 
-        public void InitializeInstances(List<IInitializable> initializables)
+        private void RemoveScheduledData()
         {
-            foreach (var initializable in initializables)
+            if (dataToRemove.Count == 0)
+                return;
+
+            foreach (var data in dataToRemove)
             {
-                initializable.Initialize();
+                updateData.Remove(data.updateable);
             }
-        }
-
-
-
-        public void LateInitializeInstances(params ILateInitializable[] lateInitializables)
-        {
-            foreach (var lateInitializable in lateInitializables)
-            {
-                lateInitializable.LateInitialize();
-            }
-        }
-
-        public void LateInitializeInstances(List<ILateInitializable> lateInitializables)
-        {
-            foreach (var lateInitializable in lateInitializables)
-            {
-                lateInitializable.LateInitialize();
-            }
+            dataToRemove.Clear();
         }
     }
 }

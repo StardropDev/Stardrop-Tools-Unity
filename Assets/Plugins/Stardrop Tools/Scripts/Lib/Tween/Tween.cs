@@ -284,7 +284,7 @@ namespace StardropTools.Tween
 
         private void RemoveFromTweenManager()
         {
-            TweenManager.Instance.RemoveTween(this);
+            TweenManager.Instance.AddTween(this);
         }
 
         private float EasePercent(float percent)

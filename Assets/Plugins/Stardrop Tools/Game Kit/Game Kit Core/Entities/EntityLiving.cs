@@ -4,7 +4,7 @@ namespace StardropTools.GameKit
 {
     public class EntityLiving : BaseEntity, IDamageable, IHealable
     {
-        [SerializeField] protected EntityModuleHealth health;
+        [SerializeField] protected EntityHealthComponent health;
 
         public int Health => health != null ? health.Health : 0;
         public int MaxHealth => health != null ? health.MaxHealth : 0;
@@ -19,7 +19,7 @@ namespace StardropTools.GameKit
         {
             if (this.health == null)
             {
-                this.health = gameObject.AddComponent<EntityModuleHealth>();
+                this.health = gameObject.AddComponent<EntityHealthComponent>();
 
                 this.health.SetHealth(health);
                 this.health.SetMaxHealth(maxHealth);

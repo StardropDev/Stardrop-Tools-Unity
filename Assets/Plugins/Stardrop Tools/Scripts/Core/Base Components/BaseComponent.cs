@@ -5,7 +5,7 @@ namespace StardropTools
     /// <summary>
     /// BaseComponent is a base class for all components with custom initialization and update logic.
     /// </summary>
-    public class BaseComponent : MonoBehaviour, IInitializable, ILateInitializable, IUpdateable, ILateUpdateable, IFixedUpdateable
+    public class BaseComponent : MonoBehaviour, IInitializable, ILateInitializable, IUpdateable
     {
         protected GameObject cachedGameObject;
 
@@ -85,7 +85,7 @@ namespace StardropTools
                 return;
             }
 
-            LoopManager.AddToLateUpdate(this);
+            LoopManager.AddToUpdate(this, 0, 0, UpdateType.LateUpdate);
             IsLateUpdating = false;
         }
 
@@ -96,7 +96,7 @@ namespace StardropTools
                 return;
             }
 
-            LoopManager.RemoveFromLateUpdate(this);
+            LoopManager.RemoveFromUpdate(this);
             IsLateUpdating = false;
         }
 
@@ -111,7 +111,7 @@ namespace StardropTools
                 return;
             }
 
-            LoopManager.AddToFixedUpdate(this);
+            LoopManager.AddToUpdate(this, 0, 0, UpdateType.FixedUpdate);
             IsFixedUpdating = true;
         }
 
@@ -122,7 +122,7 @@ namespace StardropTools
                 return;
             }
 
-            LoopManager.RemoveFromFixedUpdate(this);
+            LoopManager.AddToUpdate(this);
             IsFixedUpdating = false;
         }
 
