@@ -13,7 +13,7 @@ namespace StardropTools.CharacterControllers
         public AnimationController animationController;
 
         [Tooltip("The animator component attached to the character.")]
-        public RuntimeAnimatorController characterAnimator;
+        public Animator characterAnimator;
 
         [Tooltip("The character's model renderer.")]
         public Renderer characterRenderer;

@@ -23,7 +23,7 @@ namespace TestCharacterController
             {
                 animationController = animationController,
                 characterController = characterController,
-                characterAnimator = animationController.AnimatorController,
+                characterAnimator = animationController.Animator,
                 characterRenderer = characterController.GetComponentInChildren<Renderer>(),
                 rootTransform = characterController.transform
             };

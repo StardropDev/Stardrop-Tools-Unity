@@ -15,6 +15,7 @@ namespace StardropTools.CustomEditorWindows
         private UnityEngine.Object lastClickedObject;
         private string fbxName;
         private List<string> clipNames = new List<string>();
+        private List<bool> clipLoops = new List<bool>();
 
         [MenuItem("Stardrop Tools/Open Rename Animations Window %#&a")] // ctrl + shift + alt + a
         public static void OpenWindow()
@@ -42,14 +43,19 @@ namespace StardropTools.CustomEditorWindows
                 isGridView = !isGridView;
             }
 
-            if (GUILayout.Button("Rename Animation Clips to FBX name"))
+            if (GUILayout.Button("Clear Selection"))
             {
-                RenameAnimations();
+                ClearSelection();
             }
 
             HandleDragAndDrop();
 
             DrawSelectedFbxFiles();
+
+            if (GUILayout.Button("Rename Animation Clips to FBX name"))
+            {
+                RenameAnimations();
+            }
 
             DrawSelectedAnimationInfo();
         }
@@ -65,7 +71,7 @@ namespace StardropTools.CustomEditorWindows
                 int currentColumn = 0;
 
                 GUILayout.BeginHorizontal();
-                foreach (var obj in selectedFbxObjects)
+                foreach (var obj in new List<UnityEngine.Object>(selectedFbxObjects))
                 {
                     if (currentColumn >= columns)
                     {
@@ -77,11 +83,19 @@ namespace StardropTools.CustomEditorWindows
                     GUILayout.BeginVertical(GUILayout.Width(itemWidth));
                     if (GUILayout.Button(AssetPreview.GetAssetPreview(obj) ?? AssetDatabase.GetCachedIcon(AssetDatabase.GetAssetPath(obj)), GUILayout.Width(itemWidth), GUILayout.Height(90)))
                     {
-                        EditorGUIUtility.PingObject(obj);
-                        Selection.activeObject = obj;
-                        lastClickedObject = obj;
-                        fbxName = obj.name;
-                        UpdateClipNames(obj, false); // Set clipNames without updating them
+                        if (Event.current.button == 1) // Right click
+                        {
+                            RemoveObject(obj);
+                            Event.current.Use();
+                        }
+                        else
+                        {
+                            EditorGUIUtility.PingObject(obj);
+                            Selection.activeObject = obj;
+                            lastClickedObject = obj;
+                            fbxName = obj.name;
+                            UpdateClipNamesAndLoops(obj, false); // Set clipNames and clipLoops without updating them
+                        }
                     }
                     GUIStyle labelStyle = new GUIStyle(EditorStyles.centeredGreyMiniLabel)
                     {
@@ -97,16 +111,24 @@ namespace StardropTools.CustomEditorWindows
             }
             else
             {
-                foreach (var obj in selectedFbxObjects)
+                foreach (var obj in new List<UnityEngine.Object>(selectedFbxObjects))
                 {
                     GUILayout.BeginHorizontal();
                     if (GUILayout.Button(AssetPreview.GetAssetPreview(obj) ?? AssetDatabase.GetCachedIcon(AssetDatabase.GetAssetPath(obj)), GUILayout.Width(90), GUILayout.Height(90)))
                     {
-                        EditorGUIUtility.PingObject(obj);
-                        Selection.activeObject = obj;
-                        lastClickedObject = obj;
-                        fbxName = obj.name;
-                        UpdateClipNames(obj, false); // Set clipNames without updating them
+                        if (Event.current.button == 1) // Right click
+                        {
+                            RemoveObject(obj);
+                            Event.current.Use();
+                        }
+                        else
+                        {
+                            EditorGUIUtility.PingObject(obj);
+                            Selection.activeObject = obj;
+                            lastClickedObject = obj;
+                            fbxName = obj.name;
+                            UpdateClipNamesAndLoops(obj, false); // Set clipNames and clipLoops without updating them
+                        }
                     }
                     GUILayout.Label(obj.name, GUILayout.Width(200));
                     GUILayout.EndHorizontal();
@@ -132,6 +154,34 @@ namespace StardropTools.CustomEditorWindows
             }
         }
 
+        private void ClearSelection()
+        {
+            selectedFbxPaths.Clear();
+            selectedFbxObjects.Clear();
+            ClearClipData();
+        }
+
+        private void RemoveObject(UnityEngine.Object obj)
+        {
+            string assetPath = AssetDatabase.GetAssetPath(obj);
+            selectedFbxPaths.Remove(assetPath);
+            selectedFbxObjects.Remove(obj);
+
+            // If the removed object was the last clicked object, clear the clip data
+            if (lastClickedObject == obj)
+            {
+                ClearClipData();
+            }
+        }
+
+        private void ClearClipData()
+        {
+            lastClickedObject = null;
+            fbxName = string.Empty;
+            clipNames.Clear();
+            clipLoops.Clear();
+        }
+
         private void RenameAnimations()
         {
             foreach (var assetPath in selectedFbxPaths)
@@ -148,11 +198,12 @@ namespace StardropTools.CustomEditorWindows
                     }
 
                     bool updated = false;
-                    foreach (var clip in clipAnimations)
+                    for (int i = 0; i < clipAnimations.Length; i++)
                     {
-                        if (clip.name != fbxName)
+                        if (clipAnimations[i].name != fbxName || clipAnimations[i].loopTime != clipLoops[i])
                         {
-                            clip.name = fbxName;
+                            clipAnimations[i].name = fbxName;
+                            clipAnimations[i].loopTime = clipLoops[i];
                             updated = true;
                         }
                     }
@@ -218,17 +269,23 @@ namespace StardropTools.CustomEditorWindows
                 for (int i = 0; i < clipNames.Count; i++)
                 {
                     clipNames[i] = EditorGUILayout.TextField($"Clip Name {i + 1}: ", clipNames[i]);
+                    bool newLoopValue = EditorGUILayout.Toggle($"Loop Clip {i + 1}: ", clipLoops[i]);
+                    if (newLoopValue != clipLoops[i])
+                    {
+                        clipLoops[i] = newLoopValue;
+                        UpdateClipNamesAndLoops(lastClickedObject, true); // Update clip names and loops when toggle is changed
+                    }
                 }
 
-                if (GUILayout.Button("Update Clip Names"))
+                if (GUILayout.Button("Update Clip Names and Loops"))
                 {
-                    UpdateClipNames(lastClickedObject, true); // Update clip names when button is clicked
+                    UpdateClipNamesAndLoops(lastClickedObject, true); // Update clip names and loops when button is clicked
                     GUI.FocusControl(null); // Lose focus from all controls
                 }
             }
         }
 
-        private void UpdateClipNames(UnityEngine.Object obj, bool updateNames)
+        private void UpdateClipNamesAndLoops(UnityEngine.Object obj, bool updateNames)
         {
             string assetPath = AssetDatabase.GetAssetPath(obj);
             ModelImporter modelImporter = AssetImporter.GetAtPath(assetPath) as ModelImporter;
@@ -248,11 +305,12 @@ namespace StardropTools.CustomEditorWindows
                         for (int i = 0; i < clipAnimations.Length; i++)
                         {
                             clipAnimations[i].name = clipNames[i];
+                            clipAnimations[i].loopTime = clipLoops[i];
                         }
                         modelImporter.clipAnimations = clipAnimations;
                         AssetDatabase.WriteImportSettingsIfDirty(assetPath);
                         AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
-                        Debug.Log($"Updated animation clip names for {assetPath}");
+                        Debug.Log($"Updated animation clip names and loop settings for {assetPath}");
                     }
                     else
                     {
@@ -262,9 +320,11 @@ namespace StardropTools.CustomEditorWindows
                 else
                 {
                     clipNames.Clear();
+                    clipLoops.Clear();
                     foreach (var clip in clipAnimations)
                     {
                         clipNames.Add(clip.name);
+                        clipLoops.Add(clip.loopTime);
                     }
                 }
             }

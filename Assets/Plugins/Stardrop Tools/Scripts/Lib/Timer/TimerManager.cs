@@ -9,6 +9,8 @@ namespace StardropTools
         [NaughtyAttributes.ShowNativeProperty]
         public int TimerCount => timerList.Count;
 
+        private bool removeAllTimers;
+
         public override void HandleUpdate()
         {
             base.HandleUpdate();
@@ -38,6 +40,12 @@ namespace StardropTools
                     timerList.RemoveAt(i);
                 }
             }
+
+            if (removeAllTimers)
+            {
+                timerList.Clear();
+                removeAllTimers = false;
+            }
         }
 
         public void AddTimer(ITimer timer)
@@ -55,7 +63,7 @@ namespace StardropTools
             }
         }
 
-        internal void RemoveTimer(ITimer timer)
+        public void RemoveTimer(ITimer timer)
         {
             if (timer == null || !timerList.Contains(timer))
             {
@@ -68,6 +76,17 @@ namespace StardropTools
             {
                 StopUpdate();
             }
+        }
+
+        [NaughtyAttributes.Button("Stop All Timers")]
+        public void StopAllTimers()
+        {
+            if (timerList.Count == 0)
+            {
+                return;
+            }
+
+            removeAllTimers = true;
         }
     }
 }

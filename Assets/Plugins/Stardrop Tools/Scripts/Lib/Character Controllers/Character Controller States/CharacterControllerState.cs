@@ -36,46 +36,44 @@ namespace StardropTools.CharacterControllers
             stateMachine.ChangeState(stateID, inputData);
         }
 
+
         protected void PlayAnimation(string animationName)
         {
             //PlayAnimation(animationController, animationName);
             Debug.Log($"Playing animation: '{animationName}'");
+            modules.Components.animationController.PlayAnimation(animationName);
         }
 
-        protected void PlayAnimation(int animationIndex)
+        protected void PlayAnimation(int animationID)
         {
-            //PlayAnimation(animationController, animationIndex);
+            Debug.Log($"Playing animation with ID: '{animationID}'");
+            modules.Components.animationController.PlayAnimation(animationID);
         }
 
-        protected void PlayAnimation(AnimationController animationController, string animationName)
+        protected void PlayAnimationByIndex(int animationIndex)
         {
-            //animationController.Play(animationName);
-        }
-
-        protected void PlayAnimation(AnimationController animationController, int animationIndex)
-        {
-            //animationController.Play(animationIndex);
+            Debug.Log($"Playing animation at Index: '{animationIndex}'");
+            modules.Components.animationController.PlayAnimationByIndex(animationIndex);
         }
 
 
-        protected void CrossFadeAnimation(string animationName, float fadeLength = .15f)
+        protected void CrossfadeAnimation(string animationName)
         {
-            //CrossFadeAnimation(animationController, animationName, fadeLength);
+            //PlayAnimation(animationController, animationName);
+            Debug.Log($"Playing animation: '{animationName}'");
+            modules.Components.animationController.CrosfadeAnimation(animationName);
         }
 
-        protected void CrossFadeAnimation(int animationIndex, float fadeLength = .15f)
+        protected void CrossfadeAnimation(int animationID)
         {
-            //CrossFadeAnimation(animationController, animationIndex, fadeLength);
+            Debug.Log($"Playing animation with ID: '{animationID}'");
+            modules.Components.animationController.CrosfadeAnimation(animationID);
         }
 
-        protected void CrossFadeAnimation(AnimationController animationController, string animationName, float fadeLength = .15f)
+        protected void CrossfadeAnimationByIndex(int animationIndex)
         {
-            //animationController.CrossFade(animationName, fadeLength);
-        }
-
-        protected void CrossFadeAnimation(AnimationController animationController, int animationIndex, float fadeLength = .15f)
-        {
-            //animationController.CrossFade(animationIndex, fadeLength);
+            Debug.Log($"Playing animation at Index: '{animationIndex}'");
+            modules.Components.animationController.CrosfadeAnimationByIndex(animationIndex);
         }
 
 

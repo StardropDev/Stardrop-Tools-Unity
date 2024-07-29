@@ -13,7 +13,7 @@ namespace TestCharacterController
 
         public override void EnterState()
         {
-            PlayAnimation("Walk");
+            CrossfadeAnimation(StateData.Name);
         }
 
         public override void ExitState()

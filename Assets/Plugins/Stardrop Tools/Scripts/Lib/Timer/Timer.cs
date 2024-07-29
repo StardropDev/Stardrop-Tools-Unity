@@ -1,48 +1,53 @@
 ﻿using System;
-using UnityEngine;
 
 namespace StardropTools
 {
-    public class Timer : ITimer
+    public struct Timer : ITimer
     {
+        // Fields
         private float deltaTime;
         private readonly float duration;
         private readonly float delay;
-        private bool isReversed;
+
         private readonly int loopCount;
         private int currentLoopCount;
+        private bool isReversed;
 
         private Action onCompleteCallback;
+        private Action<float> onUpdateCallback;
 
         public readonly EventDelegate OnTimerComplete;
 
+        // Properties
         public int ID { get; private set; }
         public LoopType LoopType { get; private set; }
-        public PlayableState PlayableState { get; private set; } = PlayableState.None;
+        public PlayableState PlayableState { get; private set; }
         public bool IsScheduledForRemoval => PlayableState == PlayableState.Stopped || PlayableState == PlayableState.Completed;
 
         public bool IsPlaying => PlayableState == PlayableState.Playing;
         public float Percent => deltaTime / duration;
+        public float Duration => duration;
         public float DeltaTime => deltaTime;
         public int LoopCount => loopCount;
         public int CurrentLoopCount => currentLoopCount;
 
+        // Constructors
         public Timer(float duration, Action onCompleteCallback = null, LoopType loopType = LoopType.None, int loopCount = 0)
-            : this(-1, duration, 0, onCompleteCallback, loopType, loopCount) { }
+            : this(-1, duration, 0, onCompleteCallback, null, loopType, loopCount) { }
 
         public Timer(float duration, LoopType loopType = LoopType.None, int loopCount = 0)
-            : this(-1, duration, 0, null, loopType, loopCount) { }
+            : this(-1, duration, 0, null, null, loopType, loopCount) { }
 
         public Timer(int id, float duration, Action onCompleteCallback = null, LoopType loopType = LoopType.None, int loopCount = 0)
-            : this(id, duration, 0, onCompleteCallback, loopType, loopCount) { }
+            : this(id, duration, 0, onCompleteCallback, null, loopType, loopCount) { }
 
         public Timer(float duration, float delay, Action onCompleteCallback = null, LoopType loopType = LoopType.None, int loopCount = 0)
-            : this(-1, duration, delay, onCompleteCallback, loopType, loopCount) { }
+            : this(-1, duration, delay, onCompleteCallback, null, loopType, loopCount) { }
 
         public Timer(float duration, float delay, LoopType loopType = LoopType.None, int loopCount = 0)
-            : this(-1, duration, delay, null, loopType, loopCount) { }
+            : this(-1, duration, delay, null, null, loopType, loopCount) { }
 
-        public Timer(int id, float duration, float delay, Action onCompleteCallback = null, LoopType loopType = LoopType.None, int loopCount = 0)
+        public Timer(int id, float duration, float delay, Action onCompleteCallback = null, Action<float> onUpdateCallback = null, LoopType loopType = LoopType.None, int loopCount = 0)
         {
             this.ID = id;
             this.duration = duration;
@@ -53,18 +58,27 @@ namespace StardropTools
             this.loopCount = loopCount;
             this.currentLoopCount = loopCount;
 
+            this.PlayableState = PlayableState.None;
+
             this.onCompleteCallback = onCompleteCallback;
+            this.onUpdateCallback = onUpdateCallback;
             OnTimerComplete = new EventDelegate();
         }
 
+        // Methods
         public ITimer Play()
         {
-            deltaTime = 0;
-            isReversed = false;
-            currentLoopCount = loopCount;
+            ResetTimer();
             ChangePlayableState(PlayableState.Waiting);
             AddToTimerManager();
             return this;
+        }
+
+        public ITimer Play(Action onCompleteCallback, Action<float> onUpdateCallback = null)
+        {
+            this.onCompleteCallback = onCompleteCallback;
+            this.onUpdateCallback = onUpdateCallback;
+            return Play();
         }
 
         public ITimer Play(Action onCompleteCallback)
@@ -92,6 +106,20 @@ namespace StardropTools
             return this;
         }
 
+        public void Execute()
+        {
+            if (PlayableState == PlayableState.Waiting)
+            {
+                HandleWaitingState();
+            }
+
+            if (PlayableState == PlayableState.Playing)
+            {
+                HandlePlayingState();
+            }
+        }
+
+        // Helper Methods
         private void ChangePlayableState(PlayableState targetState)
         {
             if (targetState == PlayableState)
@@ -100,41 +128,43 @@ namespace StardropTools
             PlayableState = targetState;
         }
 
-        public void Execute()
+        private void HandleWaitingState()
         {
-            if (PlayableState == PlayableState.Waiting)
+            deltaTime += UnityEngine.Time.deltaTime;
+            if (deltaTime >= delay)
             {
-                deltaTime += UnityEngine.Time.deltaTime;
-                if (deltaTime >= delay)
-                {
-                    ChangePlayableState(PlayableState.Playing);
-                    deltaTime = 0;
-                }
+                ChangePlayableState(PlayableState.Playing);
+                deltaTime = 0;
             }
+        }
 
-            if (PlayableState == PlayableState.Playing)
+        private void HandlePlayingState()
+        {
+            deltaTime += UnityEngine.Mathf.Clamp(UnityEngine.Time.deltaTime * (isReversed ? -1 : 1), 0, duration);
+            onUpdateCallback?.Invoke(deltaTime);
+
+            if (deltaTime >= duration || deltaTime <= 0)
             {
-                deltaTime += UnityEngine.Time.deltaTime * (isReversed ? -1 : 1);
+                HandleLooping();
+            }
+        }
 
-                if (deltaTime >= duration || deltaTime <= 0)
-                {
-                    if (LoopType == LoopType.Loop)
-                    {
-                        deltaTime = 0;
-                        DecrementLoopCount();
-                    }
-                    else if (LoopType == LoopType.PingPong)
-                    {
-                        isReversed = !isReversed;
-                        deltaTime = isReversed ? duration : 0;
-                        DecrementLoopCount();
-                    }
-                    else
-                    {
-                        Complete();
-                        return;
-                    }
-                }
+        private void HandleLooping()
+        {
+            if (LoopType == LoopType.Loop)
+            {
+                deltaTime = 0;
+                DecrementLoopCount();
+            }
+            else if (LoopType == LoopType.PingPong)
+            {
+                isReversed = !isReversed;
+                deltaTime = isReversed ? duration : 0;
+                DecrementLoopCount();
+            }
+            else
+            {
+                Complete();
             }
         }
 
@@ -159,6 +189,13 @@ namespace StardropTools
             OnTimerComplete?.Invoke();
 
             RemoveFromTimerManager();
+        }
+
+        private void ResetTimer()
+        {
+            deltaTime = 0;
+            isReversed = false;
+            currentLoopCount = loopCount;
         }
 
         private void AddToTimerManager()
