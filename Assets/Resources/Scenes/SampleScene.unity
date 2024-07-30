@@ -1134,8 +1134,8 @@ GameObject:
   - component: {fileID: 1225030512}
   - component: {fileID: 1225030511}
   - component: {fileID: 1225030510}
-  - component: {fileID: 1225030516}
   - component: {fileID: 1225030515}
+  - component: {fileID: 1225030516}
   m_Layer: 0
   m_Name: Entity Player
   m_TagString: Untagged
@@ -1205,7 +1205,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 603164e852653104bb22c2195e828058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  entity: {fileID: 0}
+  actor: {fileID: 0}
   collider: {fileID: 0}
   rigidbody: {fileID: 0}
   groundCheckDistance: 0.1
@@ -1257,7 +1257,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd78efa97005c434eb4a8b36767d8474, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  entity: {fileID: 0}
+  actor: {fileID: 0}
   currentAnimationData:
     animationName: 
     animationID: 0
@@ -1282,10 +1282,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1225030509}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7118916b09f753145bd56d0bc6b6bbe7, type: 3}
+  m_Script: {fileID: 11500000, guid: 9fa2b92c175e9974ab7d4bfd14921a19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  entity: {fileID: 0}
+  actor: {fileID: 0}
+  health: 0
+  maxHealth: 0
+  canTakeDamage: 1
+  canHeal: 1
+  canDie: 1
 --- !u!1 &1429561167
 GameObject:
   m_ObjectHideFlags: 0
@@ -1732,7 +1737,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 603164e852653104bb22c2195e828058, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  entity: {fileID: 0}
+  actor: {fileID: 0}
   collider: {fileID: 0}
   rigidbody: {fileID: 0}
   groundCheckDistance: 0.1
