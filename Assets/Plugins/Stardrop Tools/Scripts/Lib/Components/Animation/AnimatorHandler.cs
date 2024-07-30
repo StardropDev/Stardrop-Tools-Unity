@@ -10,17 +10,17 @@ namespace StardropTools
     public class AnimatorHandler : MonoBehaviour
     {
         [SerializeField] private Animator animator;
-        [SerializeField] private List<AnimationState> states = new List<AnimationState>();
+        [SerializeField] private List<AnimState> states = new List<AnimState>();
         [SerializeField] private int currentStateId;
 
         public Animator Animator => animator;
 
-        public AnimationState GetStateByID(int id)
+        public AnimState GetStateByID(int id)
         {
             return states.Find(s => s.id == id);
         }
 
-        public AnimationState GetStateByIndex(int index)
+        public AnimState GetStateByIndex(int index)
         {
             if (index < 0 || index >= states.Count)
             {
@@ -31,7 +31,7 @@ namespace StardropTools
             return states[index];
         }
 
-        public AnimationState GetStateByName(string stateName)
+        public AnimState GetStateByName(string stateName)
         {
             return states.Find(s => s.stateName == stateName);
         }
@@ -46,7 +46,7 @@ namespace StardropTools
         }
 
 
-        public void PlayAnimation(AnimationState animationState)
+        public void PlayAnimation(AnimState animationState)
         {
             if (animationState == null)
             {
@@ -63,7 +63,7 @@ namespace StardropTools
 
         public void PlayAnimation(string stateName)
         {
-            AnimationState state = GetStateByName(stateName);
+            AnimState state = GetStateByName(stateName);
             if (state != null)
             {
                 PlayAnimation(state);
@@ -72,7 +72,7 @@ namespace StardropTools
 
         public void PlayAnimation(int stateId)
         {
-            AnimationState state = GetStateByID(stateId);
+            AnimState state = GetStateByID(stateId);
             if (state != null)
             {
                 PlayAnimation(state);
@@ -81,7 +81,7 @@ namespace StardropTools
 
         public void PlayAnimationByIndex(int index)
         {
-            AnimationState state = GetStateByIndex(index);
+            AnimState state = GetStateByIndex(index);
             if (state != null)
             {
                 PlayAnimation(state);
@@ -90,7 +90,7 @@ namespace StardropTools
 
 
 
-        public void CrosfadeAnimation(AnimationState animationState, float crossFade = 0)
+        public void CrosfadeAnimation(AnimState animationState, float crossFade = 0)
         {
             if (animationState == null)
             {
@@ -107,7 +107,7 @@ namespace StardropTools
 
         public void CrosfadeAnimation(string stateName, float crossFade = 0)
         {
-            AnimationState state = GetStateByName(stateName);
+            AnimState state = GetStateByName(stateName);
             if (state != null)
             {
                 CrosfadeAnimation(state, crossFade);
@@ -116,7 +116,7 @@ namespace StardropTools
 
         public void CrosfadeAnimation(int stateId, float crossFade = 0)
         {
-            AnimationState state = GetStateByID(stateId);
+            AnimState state = GetStateByID(stateId);
             if (state != null)
             {
                 CrosfadeAnimation(state, crossFade);
@@ -131,7 +131,7 @@ namespace StardropTools
                 return;
             }
 
-            AnimationState state = GetStateByIndex(index);
+            AnimState state = GetStateByIndex(index);
             if (state != null)
             {
                 CrosfadeAnimation(state, crossFade);
@@ -191,14 +191,14 @@ namespace StardropTools
                 return;
             }
 
-            var animStateList = new List<AnimationState>();
+            var animStateList = new List<AnimState>();
 
             // 5) Loop through states
             // 5.1) Create AnimState based on state & animClip info
             for (int i = 0; i < controllerStates.Length; i++)
             {
                 AnimatorState controllerState = controllerStates[i].state;
-                AnimationState newState = new AnimationState()
+                AnimState newState = new AnimState()
                 {
                     id = i,
                     stateName = controllerState.name,

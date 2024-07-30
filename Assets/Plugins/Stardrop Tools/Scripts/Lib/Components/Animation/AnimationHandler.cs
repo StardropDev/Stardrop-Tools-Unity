@@ -7,17 +7,17 @@ namespace StardropTools
     public class AnimationHandler : MonoBehaviour
     {
         [SerializeField] new Animation animation;
-        [SerializeField] private List<AnimationState> states = new List<AnimationState>();
+        [SerializeField] private List<AnimState> states = new List<AnimState>();
         [SerializeField] private int currentStateId;
 
         public Animation Animation => animation;
 
-        public AnimationState GetStateByID(int id)
+        public AnimState GetStateByID(int id)
         {
             return states.Find(s => s.id == id);
         }
 
-        public AnimationState GetStateByIndex(int index)
+        public AnimState GetStateByIndex(int index)
         {
             if (index < 0 || index >= states.Count)
             {
@@ -28,12 +28,12 @@ namespace StardropTools
             return states[index];
         }
 
-        public AnimationState GetStateByName(string stateName)
+        public AnimState GetStateByName(string stateName)
         {
             return states.Find(s => s.stateName == stateName);
         }
 
-        public AnimationState GetStateByClipName(string clipName)
+        public AnimState GetStateByClipName(string clipName)
         {
             return states.Find(s => s.clipName == clipName);
         }
@@ -46,7 +46,7 @@ namespace StardropTools
             }
         }
 
-        public void PlayAnimation(AnimationState animationState)
+        public void PlayAnimation(AnimState animationState)
         {
             if (animationState == null)
             {
@@ -63,7 +63,7 @@ namespace StardropTools
 
         public void PlayAnimation(string clipName)
         {
-            AnimationState state = GetStateByName(clipName);
+            AnimState state = GetStateByName(clipName);
             if (state != null)
             {
                 PlayAnimation(state);
@@ -72,7 +72,7 @@ namespace StardropTools
 
         public void PlayAnimation(int stateId)
         {
-            AnimationState state = GetStateByID(stateId);
+            AnimState state = GetStateByID(stateId);
             if (state != null)
             {
                 PlayAnimation(state);
@@ -81,7 +81,7 @@ namespace StardropTools
 
         public void PlayAnimationByIndex(int index)
         {
-            AnimationState state = GetStateByIndex(index);
+            AnimState state = GetStateByIndex(index);
             if (state != null)
             {
                 PlayAnimation(state);
@@ -90,14 +90,14 @@ namespace StardropTools
 
         public void PlayByClipName(string clipName)
         {
-            AnimationState state = GetStateByClipName(clipName);
+            AnimState state = GetStateByClipName(clipName);
             if (state != null)
             {
                 PlayAnimation(state);
             }
         }
 
-        public void CrossfadeAnimation(AnimationState animationState, float crossFadeDuration = 0.3f)
+        public void CrossfadeAnimation(AnimState animationState, float crossFadeDuration = 0.3f)
         {
             if (animationState == null)
             {
@@ -114,7 +114,7 @@ namespace StardropTools
 
         public void CrossfadeAnimation(string stateName, float crossFadeDuration = 0.3f)
         {
-            AnimationState state = GetStateByName(stateName);
+            AnimState state = GetStateByName(stateName);
             if (state != null)
             {
                 CrossfadeAnimation(state, crossFadeDuration);
@@ -123,7 +123,7 @@ namespace StardropTools
 
         public void CrossfadeAnimation(int stateId, float crossFadeDuration = 0.3f)
         {
-            AnimationState state = GetStateByID(stateId);
+            AnimState state = GetStateByID(stateId);
             if (state != null)
             {
                 CrossfadeAnimation(state, crossFadeDuration);
@@ -132,7 +132,7 @@ namespace StardropTools
 
         public void CrossfadeAnimationByIndex(int index, float crossFadeDuration = 0.3f)
         {
-            AnimationState state = GetStateByIndex(index);
+            AnimState state = GetStateByIndex(index);
             if (state != null)
             {
                 CrossfadeAnimation(state, crossFadeDuration);
@@ -141,7 +141,7 @@ namespace StardropTools
 
         public void CrossfadeByClipName(string clipName, float crossFadeDuration = 0.3f)
         {
-            AnimationState state = GetStateByClipName(clipName);
+            AnimState state = GetStateByClipName(clipName);
             if (state != null)
             {
                 CrossfadeAnimation(state, crossFadeDuration);
@@ -180,7 +180,7 @@ namespace StardropTools
             for (int i = 0; i < animClips.Length; i++)
             {
                 var animClip = animClips[i];
-                AnimationState newState = new AnimationState()
+                AnimState newState = new AnimState()
                 {
                     id = i,
                     stateName = animClip.name,

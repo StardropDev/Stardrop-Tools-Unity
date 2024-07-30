@@ -6,7 +6,7 @@ namespace StardropTools
     [CreateAssetMenu(fileName = "AnimationState", menuName = "Stardrop Tools/Animation State")]
     public class AnimationStateSO : ScriptableObject
     {
-        public AnimationState animationState;
+        public AnimState animationState;
         public AnimationClip clip;
 
         public int ID => animationState.id;

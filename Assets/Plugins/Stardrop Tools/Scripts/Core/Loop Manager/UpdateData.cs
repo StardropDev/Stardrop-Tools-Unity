@@ -1,5 +1,6 @@
 namespace StardropTools
 {
+    [System.Serializable]
     public struct UpdateData
     {
         public float updateFrequency;

@@ -14,7 +14,7 @@ namespace StardropTools
             var clips = new AnimationClip[animation.GetClipCount()];
             int index = 0;
 
-            foreach (UnityEngine.AnimationState state in animation)
+            foreach (AnimationState state in animation)
             {
                 clips[index] = state.clip;
                 index++;
